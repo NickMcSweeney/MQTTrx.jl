@@ -1,9 +1,9 @@
-# MQTT.jl
+# MQTTrx.jl
 
 [![Build Status](https://travis-ci.org/rweilbacher/MQTT.jl.svg?branch=master)](https://travis-ci.org/rweilbacher/MQTT.jl)
 [![Coverage Status](https://coveralls.io/repos/github/kivaari/MQTT.jl/badge.svg?branch=master)](https://coveralls.io/github/kivaari/MQTT.jl?branch=master)
 
-MQTT Client Library
+ReactiveX MQTT Client Library
 
 This code builds a library which enables applications to connect to an MQTT broker to publish messages, and to subscribe to topics and receive published messages.
 
@@ -54,7 +54,7 @@ Pkg.clone("https://github.com/NickMcSweeney/MQTTrx.jl.git")
 Testing
 -------
 ```julia
-Pkg.test("MQTT")
+Pkg.test("MQTTrx")
 ```
 Usage
 -----
@@ -62,7 +62,7 @@ Import the library with the `using` keyword.
 
 Samples are available in the `examples` directory.
 ```julia
-using MQTT
+using MQTTrx
 ```
 
 ## Getting started

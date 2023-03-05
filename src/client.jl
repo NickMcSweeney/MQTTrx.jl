@@ -1,5 +1,3 @@
-using Base.Threads
-
 struct MQTTException <: Exception
     msg::AbstractString
 end
@@ -12,12 +10,12 @@ mutable struct ConnectOpts
     clean_session::Bool
     keep_alive::UInt16
     client_id::String
-    will::Nullable{Message}
-    username::Nullable{String}
-    password::Nullable{Array{UInt8}}
+    will::Union{Message, Nothing}
+    username::Union{String, Nothing}
+    password::Union{Array{UInt8}, Nothing}
     get_io::Function
 end
-ConnectOpts(get_io::Function) = ConnectOpts(true, 0x0000, "", Nullable{Message}(), Nullable{String}(), Nullable{Array{UInt8}}(), get_io)
+ConnectOpts(get_io::Function) = ConnectOpts(true, 0x0000, "", Union{Message,Nothing}(), Union{String,Nothing}(), Union{Array{UInt8},Nothing}(), get_io)
 ConnectOpts(host::AbstractString, port::Integer=1883) = ConnectOpts(() -> connect(host, port))
 ConnectOpts() = ConnectOpts(() -> TCPSocket())
 

@@ -5,12 +5,12 @@ struct Connect <: Packet
     clean_session::Bool
     keep_alive::UInt16
     client_id::String
-    will::Nullable{Message}
-    username::Nullable{String}
-    password::Nullable{Array{UInt8}}
+    will::Union{Message,Nothing}
+    username::Union{String,Nothing}
+    password::Union{Array{UInt8}, Nothing}
     id::UInt16
 end
-Connect(clean_session::Bool, keep_alive::UInt16, client_id::String, will::Nullable{Message}, username::Nullable{String}, password::Nullable{Array{UInt8}}) = Connect(CONNECT, "MQTT", 0x04, clean_session, keep_alive, client_id, will, username, password, 0)
+Connect(clean_session::Bool, keep_alive::UInt16, client_id::String, will::Union{Message,Nothing}, username::Union{String,Nothing}, password::Union{Array{UInt8},Nothing}) = Connect(CONNECT, "MQTT", 0x04, clean_session, keep_alive, client_id, will, username, password, 0)
 
 function write(s::IO, packet::Connect)
     mqtt_write(s, packet.protocol_name)
@@ -44,9 +44,9 @@ Base.show(io::IO, x::Connect) = print(io, "connect[protocol_name: '", x.protocol
 ", clean_session: ", x.clean_session,
 ", keep_alive: ", x.keep_alive,
 ", client_id: '", x.client_id, "'",
-", will: ", get(x.will, "none"),
-", username: ", get(x.username, "none"),
-", password: ", get(x.password, "none"), "]")
+", will: ", (x.will || "none"),
+", username: ", (x.username || "none"),
+", password: ", (x.password || "none"), "]")
 
 struct Connack <: Packet
     header::UInt8

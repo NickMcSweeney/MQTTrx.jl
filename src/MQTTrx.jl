@@ -1,5 +1,7 @@
-module MQTT
+module MQTTrx
 
+import Distributed: Future
+import Base.Threads: Atomic
 import Base: connect, read, write, get
 
 include("utils.jl")
