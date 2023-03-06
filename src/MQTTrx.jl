@@ -1,31 +1,41 @@
 module MQTTrx
 
-import Distributed: Future
-import Base.Threads: Atomic
-import Base: connect, read, write, get
+using Distributed: Future
+using Base.Threads: Atomic
+using Sockets: TCPSocket
+using Random: randstring
+using Dates
+
+import Base: ReentrantLock, lock, unlock, convert
+# import Base: connect, read, write, get
 
 include("utils.jl")
-include("packet.jl")
-include("packets/connect.jl")
-include("packets/publish.jl")
-include("packets/subscribe.jl")
-include("packets/unsubscribe.jl")
-include("packets/disconnect.jl")
-include("packets/ping.jl")
-include("net.jl")
 include("client.jl")
 
-export
-AT_MOST_ONCE,
-AT_LEAST_ONCE,
-EXACTLY_ONCE,
-Client,
-ConnectOpts,
-get,
-connect,
-disconnect,
-subscribe,
-unsubscribe,
-publish
+# include("utils.jl")
+# include("packet.jl")
+# include("packets/connect.jl")
+# include("packets/publish.jl")
+# include("packets/subscribe.jl")
+# include("packets/unsubscribe.jl")
+# include("packets/disconnect.jl")
+# include("packets/ping.jl")
+# include("net.jl")
+# include("client.jl")
 
+export
+    Client,
+    User,
+    QOS_0,
+    QOS_1,
+    QOS_2,
+    connect,
+    @subscribe,
+    subscribe,
+    unsubscribe,
+    @publish,
+    publish,
+    disconnect,
+    get,
+    MQTT_ERR_INVAL
 end
