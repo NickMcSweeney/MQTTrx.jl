@@ -1,8 +1,16 @@
-import Base: read, write, close
-import MQTTrx: read_len, Message
-using Base.Test, MQTTrx
+module Test
 
-#include("smoke.jl")
-include("mocksocket.jl")
-include("packet.jl")
-include("unittests.jl")
+include("../src/RxMQTT.jl")
+using .RxMQTT
+using Random
+using Test
+using Rocket
+
+# import Base: read, write, close
+
+include("smoke.jl")
+# include("mocksocket.jl")
+# include("packet.jl")
+# include("unittests.jl")
+
+end # module

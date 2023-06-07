@@ -1,3 +1,3 @@
-using Documenter, MQTTrx
+using Documenter, RxMQTT
 
 makedocs()

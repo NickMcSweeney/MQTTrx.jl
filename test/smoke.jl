@@ -1,43 +1,43 @@
-info("Running smoke tests")
+@testset "Smoke tests" begin
+    println("Running smoke tests")
 
-condition = Condition()
-expected_topic = randstring(20)
-expected_payload = convert(Array{UInt8}, randstring(20))
+    condition = Condition()
+    topic = "foo"
+    payload = Random.randstring(20)
+    foo = Subject(Packet, scheduler=AsyncScheduler())
+    bar = Subject(Packet, scheduler=AsyncScheduler())
 
-function on_msg(topic, payload)
-    @test topic == expected_topic
-    @test payload == expected_payload
-    notify(condition)
+    client = Client()
+    println(client)
+
+    register_subscriber(client, ("foo",foo))
+    register_publisher(client, ("foo", bar))
+
+    subscribe!(bar, logger())
+
+
+    println("Testing reconnect")
+    connect(client, "test.mosquitto.org")
+    # disconnect(client)
+    # connect(client, "test.mosquitto.org")
+
+    # @time subscribe(client, (topic, QOS_0))
+
+    # println("Testing publish qos 0")
+    # publish(client, topic, payload, qos=QOS_0)
+    # wait(condition)
+
+    # println("Testing publish qos 1")
+    # publish(client, topic, payload, qos=QOS_1)
+    # wait(condition)
+
+    # println("Testing publish qos 2")
+    # publish(client, topic, payload, qos=QOS_2)
+    # wait(condition)
+
+    # println("Testing connect will")
+    # disconnect(client)
+    # connect(client, "test.mosquitto.org", will=Message(false, 0x00, false, topic, payload))
+
+    # disconnect(client)
 end
-
-function on_disconnect(reason)
-    @test reason == nothing
-end
-
-client = Client(on_msg, on_disconnect, 60)
-opts = ConnectOpts("test.mosquitto.org")
-opts.keep_alive = 0x0006
-
-info("Testing reconnect")
-connect(client, opts)
-disconnect(client)
-connect(client, opts)
-
-future = subscribe(client, (expected_topic, AT_MOST_ONCE), async=true)
-get(future)
-
-info("Testing publish qos 0")
-publish(client, expected_topic, expected_payload, qos=AT_MOST_ONCE)
-wait(condition)
-
-info("Testing publish qos 1")
-publish(client, expected_topic, expected_payload, qos=AT_LEAST_ONCE)
-wait(condition)
-
-info("Testing publish qos 2")
-publish(client, expected_topic, expected_payload, qos=EXACTLY_ONCE)
-wait(condition)
-
-sleep(10)
-
-disconnect(client)

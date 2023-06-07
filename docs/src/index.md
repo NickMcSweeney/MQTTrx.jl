@@ -1,5 +1,5 @@
-# MQTTrx.jl
+# RxMQTT.jl
 
 ```@autodocs
-Modules = [MQTTrx]
+Modules = [RxMQTT]
 ```

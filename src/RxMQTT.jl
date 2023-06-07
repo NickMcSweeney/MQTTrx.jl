@@ -1,10 +1,11 @@
-module MQTTrx
+module RxMQTT
 
 using Distributed: Future
 using Base.Threads: Atomic
 using Sockets: TCPSocket
 using Random: randstring
 using Dates
+using Rocket
 
 import Base: ReentrantLock, lock, unlock, convert
 # import Base: connect, read, write, get
@@ -25,17 +26,20 @@ include("client.jl")
 
 export
     Client,
-    User,
-    QOS_0,
-    QOS_1,
-    QOS_2,
-    connect,
-    @subscribe,
-    subscribe,
-    unsubscribe,
-    @publish,
-    publish,
-    disconnect,
-    get,
-    MQTT_ERR_INVAL
+    Packet,
+    register_publisher,
+    register_subscriber
+#     User,
+#     QOS_0,
+#     QOS_1,
+#     QOS_2,
+#     connect,
+#     @subscribe,
+#     subscribe,
+#     unsubscribe,
+#     @publish,
+#     publish,
+#     disconnect,
+#     get,
+#     MQTT_ERR_INVAL
 end

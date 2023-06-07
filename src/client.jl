@@ -67,15 +67,22 @@ struct User
     password::String
 end
 
-mutable struct Client
-    on_msg::Function
+mutable struct Record
+    last_id::UInt16
+end
+
+struct Client
+    
+    read_topics::Dict{String,Rocket.Subject{Packet}}
+    write_topics::Dict{String, Rocket.Subject{Packet}}
+    
+    write_packets::UInt32
+    
     keep_alive::UInt16
 
-    # TODO mutex?
-    last_id::UInt16
+    record::Record
     in_flight::Dict{UInt16, Future}
 
-    write_packets::Channel{Packet}
     socket
     socket_lock # TODO add type
 
@@ -86,31 +93,30 @@ mutable struct Client
     last_sent::Atomic{Float64}
     last_received::Atomic{Float64}
 
-    Client(on_msg::Function) = new(
-                                   on_msg,
-                                   0x0000,
-                                   0x0000,
-                                   Dict{UInt16, Future}(),
-                                   Channel{Packet}(60),
-                                   TCPSocket(),
-                                   ReentrantLock(),
-                                   60,
-                                   Atomic{UInt8}(0),
-                                   Atomic{Float64}(),
-                                   Atomic{Float64}())
+    Client() = new(
+                    Dict{String,Rocket.Subject{Packet}}(),
+                    Dict{String,Rocket.Subject{Packet}}(),
+                    0x0000,
+                    Record(0x0000),
+                    Dict{UInt16, Future}(),
+                    TCPSocket(),
+                    ReentrantLock(),
+                    60,
+                    Atomic{UInt8}(0),
+                    Atomic{Float64}(),
+                    Atomic{Float64}())
 
-    Client(on_msg::Function, ping_timeout::UInt64) = new(
-                                                         on_msg,
-                                                         0x0000,
-                                                         0x0000,
-                                                         Dict{UInt16, Future}(),
-                                                         Channel{Packet}(60),
-                                                         TCPSocket(),
-                                                         ReentrantLock(),
-                                                         ping_timeout,
-                                                         Atomic{UInt8}(0),
-                                                         Atomic{Float64}(),
-                                                         Atomic{Float64}())
+    Client(ping_timeout::UInt64) = new(
+                                        Dict{String,Rocket.Subject{Vector{UInt8}}}(),
+                                        0x0000,
+                                        Record(0x0000),
+                                        Dict{UInt16, Future}(),
+                                        TCPSocket(),
+                                        ReentrantLock(),
+                                        ping_timeout,
+                                        Atomic{UInt8}(0),
+                                        Atomic{Float64}(),
+                                        Atomic{Float64}())
 end
 
 
@@ -154,7 +160,7 @@ function handle_publish(client::Client, s::IO, cmd::UInt8, flags::UInt8)
     end
 
     payload = take!(s)
-    @async client.on_msg(topic, payload)
+    next!(client.on_msg, (topic, payload))
 end
 
 function handle_ack(client::Client, s::IO, cmd::UInt8, flags::UInt8)
@@ -215,6 +221,41 @@ function packet_id(client)
     return client.last_id
 end
 
+function register_subscriber(client, topic::Tuple{String,Rocket.Subject})
+    client.read_topics[first(topic)] = last(topic)
+end
+
+function register_publisher(client, topic::Tuple{String,Rocket.Subject})
+    client.write_topics[first(topic)] = last(topic)
+end
+
+# function write_sub(client)
+#     subscribe!(client.write_packets, lambdat(
+#         on_next = (packet) -> begin 
+#             #Note: Why do we push into a pipebuffer and then take it out?
+#             buffer = PipeBuffer()
+#             for i in packet.data
+#                 mqtt_write(buffer, i)
+#             end
+#             data = take!(buffer)
+#             lock(client.socket_lock)
+#             write(client.socket, packet.cmd)
+#             write_len(client.socket, length(data))
+#             write(client.socket, data)
+#             unlock(client.socket_lock)
+#             atomic_xchg!(client.last_sent, time())
+#         end,
+#         on_complete = () -> close(client.socket)
+#         on_error = (e) -> begin
+#             if isa(e, InvalidStateException)
+#                 close(client.socket)
+#             else
+#                 rethrow()
+#             end
+#         end
+#     ))
+# end
+
 function write_loop(client)
     try
         while true
@@ -241,6 +282,23 @@ function write_loop(client)
     end
 end
 
+# function read_sub(client)
+#     subscribe!(client.read_packets, lambda(
+#         on_next((packet) -> begin
+            
+#         end),
+#         on_complete(() -> println("read done")),
+#         on_error(e -> isa(e, EOFError) ? (@error e) : rethrow())
+#     ))
+# end
+
+# function read_socket(client) 
+#     # make(Int) do actor
+#     #     while
+#     #     next!(actor, 0)
+#     #     complete!(actor)
+#     # end
+# end
 function read_loop(client)
     try
         while true
@@ -356,15 +414,15 @@ function connect_async(client::Client, host::AbstractString, port::Integer=1883;
                        will::Message=Message(false, 0x00, false, "", Array{UInt8}()),
                        clean_session::Bool=true)
 
-    client.write_packets = Channel{Packet}(client.write_packets.sz_max)
+    # client.write_packets = Channel{Packet}(client.write_packets.sz_max)
     try
         client.keep_alive = convert(UInt16, keep_alive)
     catch
         error("Could not convert keep_alive to UInt16")
     end
     client.socket = connect(host, port)
-    @async write_loop(client)
-    @async read_loop(client)
+    # @async write_loop(client)
+    # @async read_loop(client)
 
     if client.keep_alive > 0x0000
         @async keep_alive_loop(client)

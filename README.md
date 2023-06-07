@@ -1,4 +1,4 @@
-# MQTTrx.jl
+# RxMQTT.jl
 
 [![Build Status](https://travis-ci.org/rweilbacher/MQTT.jl.svg?branch=master)](https://travis-ci.org/rweilbacher/MQTT.jl)
 [![Coverage Status](https://coveralls.io/repos/github/kivaari/MQTT.jl/badge.svg?branch=master)](https://coveralls.io/github/kivaari/MQTT.jl?branch=master)
@@ -49,12 +49,12 @@ Contents
 Installation
 ------------
 ```julia
-Pkg.clone("https://github.com/NickMcSweeney/MQTTrx.jl.git")
+Pkg.clone("https://github.com/NickMcSweeney/RxMQTT.jl.git")
 ```
 Testing
 -------
 ```julia
-Pkg.test("MQTTrx")
+Pkg.test("RxMQTT")
 ```
 Usage
 -----
@@ -62,7 +62,7 @@ Import the library with the `using` keyword.
 
 Samples are available in the `examples` directory.
 ```julia
-using MQTTrx
+using RxMQTT
 ```
 
 ## Getting started

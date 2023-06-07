@@ -1,4 +1,4 @@
-import MQTTrx: topic_wildcard_len_check, filter_wildcard_len_check, MQTTException
+import RxMQTT: topic_wildcard_len_check, filter_wildcard_len_check, MQTTException
 
 @testset "topic_wildcard_len_check" begin
     @test_throws MQTTException topic_wildcard_len_check("+")
